@@ -110,6 +110,84 @@
             background: linear-gradient(135deg, #4a5fd8 0%, #5a3f8a 100%);
         }
 
+        .mystery-bonus-banner {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 13px;
+            border: 2px solid #a78bfa;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .mystery-bonus-banner.hidden {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            border-color: #9ca3af;
+        }
+
+        .mystery-reveal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 10002;
+            opacity: 0;
+            transition: all 0.5s ease;
+            border: 5px solid #a78bfa;
+        }
+
+        .mystery-reveal.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .mystery-reveal h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .mystery-reveal .bonus-details {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        .mystery-reveal .multiplier {
+            font-size: 48px;
+            color: #fbbf24;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+            animation: glow 2s infinite;
+        }
+
+        .mystery-reveal .close-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: white;
+            color: #7c3aed;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .mystery-reveal .close-btn:hover {
+            transform: scale(1.05);
+        }
+
         .victory-banner {
             position: fixed;
             top: 50%;
@@ -408,7 +486,7 @@
             border-radius: 10px;
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 10002;
+            z-index: 10003;
             opacity: 0;
             transition: all 0.3s ease;
         }
@@ -458,10 +536,6 @@
         }
 
         .wednesday-input-group {
-            margin-bottom: 12px;
-        }
-
-        .wednesday-input-group:last-child {
             margin-bottom: 0;
         }
 
@@ -520,6 +594,11 @@
             background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
         }
 
+        .person-daily-total.mystery-active {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            animation: pulse 2s infinite;
+        }
+
         .input-row {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -535,6 +614,24 @@
             font-size: 11px;
             margin-bottom: 5px;
             color: var(--text-secondary);
+        }
+
+        .input-group.mystery-bonus {
+            position: relative;
+        }
+
+        .input-group.mystery-bonus::after {
+            content: '✨';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 20px;
+            animation: sparkle 1.5s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.7; }
         }
 
         input[type="number"], input[type="text"], select.game-input {
@@ -795,6 +892,10 @@
                 font-size: 96px;
             }
 
+            .mystery-reveal h2 {
+                font-size: 52px;
+            }
+
             .badges-grid {
                 grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             }
@@ -838,7 +939,7 @@
                 font-size: 20px;
             }
 
-            .victory-banner {
+            .victory-banner, .mystery-reveal {
                 padding: 30px 20px;
                 width: 90%;
             }
@@ -853,6 +954,18 @@
 
             .victory-banner .winner-score {
                 font-size: 24px;
+            }
+
+            .mystery-reveal h2 {
+                font-size: 28px;
+            }
+
+            .mystery-reveal .bonus-details {
+                font-size: 20px;
+            }
+
+            .mystery-reveal .multiplier {
+                font-size: 36px;
             }
 
             .finish-btn {
@@ -876,6 +989,16 @@
         📋 Copied to clipboard!
     </div>
 
+    <div class="mystery-reveal" id="mysteryReveal">
+        <h2>🎰 MYSTERY BONUS REVEALED! 🎰</h2>
+        <div class="bonus-details">
+            <div id="mysteryDay">Monday</div>
+            <div id="mysteryGame">Wordle</div>
+        </div>
+        <div class="multiplier" id="mysteryMultiplier">3X</div>
+        <button class="close-btn" onclick="closeMysteryReveal()">Awesome!</button>
+    </div>
+
     <div class="victory-banner" id="victoryBanner">
         <h2>🏆 WINNER! 🏆</h2>
         <div class="winner-name" id="winnerName">Carl</div>
@@ -891,6 +1014,10 @@
             <button onclick="changeWeek(-1)">← Prev</button>
             <div class="week-info" id="weekInfo">Week 5, 2026</div>
             <button onclick="changeWeek(1)" id="nextWeekBtn">Next →</button>
+        </div>
+
+        <div id="mysteryBonusBanner" class="mystery-bonus-banner hidden">
+            🎰 Mystery Bonus Active! Complete games to reveal...
         </div>
 
         <div class="sync-status" id="syncStatus">🔄 Connecting...</div>
@@ -931,11 +1058,11 @@
                     <div class="person-daily-total" id="carl-daily">0.00</div>
                 </div>
                 <div class="input-row">
-                    <div class="input-group">
+                    <div class="input-group" id="carl-wordle-group">
                         <label>Wordle</label>
                         <input type="number" id="carl-wordle" step="1" min="0" max="6" inputmode="numeric" oninput="handleInput('carl')">
                     </div>
-                    <div class="input-group">
+                    <div class="input-group" id="carl-connections-group">
                         <label>Connections</label>
                         <select class="game-input" id="carl-connections" onchange="handleInput('carl')">
                             <option value="">-</option>
@@ -945,7 +1072,7 @@
                             <option value="3lives">3 Lives Lost</option>
                         </select>
                     </div>
-                    <div class="input-group">
+                    <div class="input-group" id="carl-mini-group">
                         <label>Mini (mm:ss)</label>
                         <div class="time-input-wrapper">
                             <input type="number" id="carl-mini-min" min="0" max="59" placeholder="M" inputmode="numeric" oninput="handleInput('carl')">
@@ -962,11 +1089,11 @@
                     <div class="person-daily-total" id="pete-daily">0.00</div>
                 </div>
                 <div class="input-row">
-                    <div class="input-group">
+                    <div class="input-group" id="pete-wordle-group">
                         <label>Wordle</label>
                         <input type="number" id="pete-wordle" step="1" min="0" max="6" inputmode="numeric" oninput="handleInput('pete')">
                     </div>
-                    <div class="input-group">
+                    <div class="input-group" id="pete-connections-group">
                         <label>Connections</label>
                         <select class="game-input" id="pete-connections" onchange="handleInput('pete')">
                             <option value="">-</option>
@@ -976,7 +1103,7 @@
                             <option value="3lives">3 Lives Lost</option>
                         </select>
                     </div>
-                    <div class="input-group">
+                    <div class="input-group" id="pete-mini-group">
                         <label>Mini (mm:ss)</label>
                         <div class="time-input-wrapper">
                             <input type="number" id="pete-mini-min" min="0" max="59" placeholder="M" inputmode="numeric" oninput="handleInput('pete')">
@@ -988,7 +1115,7 @@
             </div>
         </div>
 
-        <p class="help-text">💡 Wordle 1 = 10pts | Connections: Perfect=5, 1 life=4, 2 lives=3, 3 lives=2<br>Mini: <30s=10pts, 30-60s=5pts, 61-90s=3pts, 91-120s=2pts, >120s=1pt<br>🎉 Friday: All points doubled!</p>
+        <p class="help-text">💡 Wordle 1 = 10pts | Connections: Perfect=5, 1 life=4, 2 lives=3, 3 lives=2<br>Mini: <30s=10pts, 30-60s=5pts, 61-90s=3pts, 91-120s=2pts, >120s=1pt<br>🎉 Friday: All points doubled! | 🎰 Mystery bonus each week!</p>
 
         <div class="badges-section">
             <div class="badges-title">🏅 Achievements</div>
@@ -1067,7 +1194,6 @@
         const database = firebase.database();
         const dataRef = database.ref('wordleMegaData');
 
-        // Password protection for reset
         const RESET_PASSWORD = "wordle2026";
 
         function validateResetPassword(inputPassword) {
@@ -1086,7 +1212,7 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                z-index: 10003;
+                z-index: 10004;
             `;
             
             passwordPrompt.innerHTML = `
@@ -1213,7 +1339,7 @@
                         border-radius: 10px;
                         font-weight: 600;
                         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                        z-index: 10004;
+                        z-index: 10005;
                     `;
                     notification.textContent = '🗑️ All data has been reset!';
                     document.body.appendChild(notification);
@@ -1235,7 +1361,6 @@
             }
         }
 
-        // Week and theme management
         let currentWeek = getCurrentWeekNumber();
         let currentYear = new Date().getFullYear();
         let theme = localStorage.getItem('theme') || 'light';
@@ -1248,7 +1373,6 @@
         function getCurrentWeekNumber() {
             const now = new Date();
             
-            // ISO 8601 week calculation
             const target = new Date(now.valueOf());
             const dayNumber = (now.getDay() + 6) % 7;
             target.setDate(target.getDate() - dayNumber + 3);
@@ -1259,6 +1383,146 @@
             }
             
             return 1 + Math.ceil((firstThursday - target) / 604800000);
+        }
+
+        // Mystery Bonus System
+        function generateMysteryBonus(weekKey) {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            const games = ['wordle', 'connections', 'mini'];
+            const multipliers = [2, 3, 4];
+            
+            // Use week number as seed for consistent random
+            const seed = parseInt(weekKey.replace('week', ''));
+            
+            const dayIndex = seed % days.length;
+            const gameIndex = (seed * 3) % games.length;
+            const multIndex = (seed * 7) % multipliers.length;
+            
+            return {
+                day: days[dayIndex],
+                game: games[gameIndex],
+                multiplier: multipliers[multIndex],
+                revealed: false
+            };
+        }
+
+        function checkMysteryBonusReveal() {
+            const weekKey = `week${currentWeek}`;
+            if (!data[weekKey].mysteryBonus) {
+                data[weekKey].mysteryBonus = generateMysteryBonus(weekKey);
+            }
+            
+            const mystery = data[weekKey].mysteryBonus;
+            
+            if (mystery.revealed) {
+                updateMysteryBonusBanner(true);
+                return;
+            }
+            
+            const bonusDay = mystery.day;
+            const bonusGame = mystery.game;
+            const dayData = data[weekKey][bonusDay];
+            
+            let carlCompleted = false;
+            let peteCompleted = false;
+            
+            if (bonusGame === 'wordle') {
+                carlCompleted = dayData.carl.wordle !== '';
+                peteCompleted = dayData.pete.wordle !== '';
+            } else if (bonusGame === 'connections') {
+                carlCompleted = dayData.carl.connections !== '';
+                peteCompleted = dayData.pete.connections !== '';
+            } else if (bonusGame === 'mini') {
+                carlCompleted = (dayData.carl.miniMin !== '' || dayData.carl.miniSec !== '');
+                peteCompleted = (dayData.pete.miniMin !== '' || dayData.pete.miniSec !== '');
+            }
+            
+            if (carlCompleted && peteCompleted && !mystery.revealed) {
+                mystery.revealed = true;
+                data[weekKey].mysteryBonus = mystery;
+                saveToFirebase();
+                revealMysteryBonus();
+            }
+            
+            updateMysteryBonusBanner(mystery.revealed);
+        }
+
+        function revealMysteryBonus() {
+            const weekKey = `week${currentWeek}`;
+            const mystery = data[weekKey].mysteryBonus;
+            
+            const gameNames = {
+                'wordle': 'Wordle',
+                'connections': 'Connections',
+                'mini': 'Mini Crossword'
+            };
+            
+            document.getElementById('mysteryDay').textContent = mystery.day;
+            document.getElementById('mysteryGame').textContent = gameNames[mystery.game];
+            document.getElementById('mysteryMultiplier').textContent = `${mystery.multiplier}X POINTS!`;
+            
+            const reveal = document.getElementById('mysteryReveal');
+            reveal.classList.add('show');
+            
+            playVictorySound();
+            launchConfetti();
+            launchStarCelebration();
+            
+            calculateTotals();
+        }
+
+        function closeMysteryReveal() {
+            const reveal = document.getElementById('mysteryReveal');
+            reveal.classList.remove('show');
+        }
+
+        function updateMysteryBonusBanner(revealed) {
+            const weekKey = `week${currentWeek}`;
+            const banner = document.getElementById('mysteryBonusBanner');
+            
+            if (!data[weekKey].mysteryBonus) {
+                data[weekKey].mysteryBonus = generateMysteryBonus(weekKey);
+            }
+            
+            const mystery = data[weekKey].mysteryBonus;
+            
+            if (revealed) {
+                const gameNames = {
+                    'wordle': 'Wordle',
+                    'connections': 'Connections',
+                    'mini': 'Mini Crossword'
+                };
+                banner.textContent = `🎰 Mystery Bonus: ${mystery.day} ${gameNames[mystery.game]} = ${mystery.multiplier}X Points!`;
+                banner.classList.remove('hidden');
+            } else {
+                banner.textContent = '🎰 Mystery Bonus Active! Complete games to reveal...';
+                banner.classList.add('hidden');
+            }
+        }
+
+        function highlightMysteryGame() {
+            const weekKey = `week${currentWeek}`;
+            const day = document.getElementById('daySelect').value;
+            
+            // Remove all highlights first
+            ['carl', 'pete'].forEach(person => {
+                ['wordle', 'connections', 'mini'].forEach(game => {
+                    const group = document.getElementById(`${person}-${game}-group`);
+                    if (group) group.classList.remove('mystery-bonus');
+                });
+            });
+            
+            if (!data[weekKey].mysteryBonus) return;
+            
+            const mystery = data[weekKey].mysteryBonus;
+            
+            // Only highlight if on the mystery day and bonus is revealed
+            if (day === mystery.day && mystery.revealed) {
+                ['carl', 'pete'].forEach(person => {
+                    const group = document.getElementById(`${person}-${mystery.game}-group`);
+                    if (group) group.classList.add('mystery-bonus');
+                });
+            }
         }
 
         function changeWeek(direction) {
@@ -1295,7 +1559,6 @@
             btn.textContent = theme === 'dark' ? '☀️' : '🌙';
         }
 
-        // Sound Management
         let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const audioContext = new AudioContext();
@@ -1332,7 +1595,6 @@
             
             const now = audioContext.currentTime;
             
-            // Fast ascending notes for speed
             [0, 0.05, 0.1, 0.15, 0.2].forEach((delay, i) => {
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
@@ -1550,7 +1812,7 @@
                 this.rotation = Math.random() * 360;
                 this.rotationSpeed = Math.random() * 8 - 4;
                 this.size = Math.random() * 30 + 30;
-                this.emoji = ['⚡', '🚀', '💨', '🔥', '⭐'][Math.floor(Math.random() * 5)];
+                this.emoji = ['⚡', '🚀', '💨', '🔥', '⭐', '🎰', '💎'][Math.floor(Math.random() * 7)];
                 this.opacity = 1;
             }
 
@@ -1661,7 +1923,6 @@
             }
         }
 
-        // Scoring functions
         function calculateWordleScore(wordle) {
             if (!wordle || wordle === '') return 0;
             const score = parseInt(wordle);
@@ -1687,6 +1948,7 @@
             const sec = parseInt(seconds) || 0;
             const totalSeconds = (min * 60) + sec;
             
+            if (totalSeconds === 0) return 0;
             if (totalSeconds < 30) return 10;
             if (totalSeconds <= 60) return 5;
             if (totalSeconds <= 90) return 3;
@@ -1695,10 +1957,23 @@
         }
 
         function calculateDailyTotal(wordle, connections, miniMin, miniSec, day) {
-            let total = calculateWordleScore(wordle) + 
-                       calculateConnectionsScore(connections) + 
-                       calculateMiniScore(miniMin, miniSec);
+            const weekKey = `week${currentWeek}`;
+            const mystery = data[weekKey]?.mysteryBonus;
             
+            let wordleScore = calculateWordleScore(wordle);
+            let connectionsScore = calculateConnectionsScore(connections);
+            let miniScore = calculateMiniScore(miniMin, miniSec);
+            
+            // Apply mystery bonus if revealed
+            if (mystery && mystery.revealed && mystery.day === day) {
+                if (mystery.game === 'wordle') wordleScore *= mystery.multiplier;
+                if (mystery.game === 'connections') connectionsScore *= mystery.multiplier;
+                if (mystery.game === 'mini') miniScore *= mystery.multiplier;
+            }
+            
+            let total = wordleScore + connectionsScore + miniScore;
+            
+            // Friday bonus still applies (separate from mystery bonus)
             if (day === 'Friday') {
                 total = total * 2;
             }
@@ -1709,12 +1984,10 @@
         function handleInput(person) {
             const wordle = document.getElementById(`${person}-wordle`).value;
             
-            // Trigger confetti on Wordle = 1
             if (wordle === '1') {
                 launchConfetti();
             }
             
-            // Update mini crossword time display
             const min = document.getElementById(`${person}-mini-min`).value;
             const sec = document.getElementById(`${person}-mini-sec`).value;
             const display = document.getElementById(`${person}-mini-display`);
@@ -1723,7 +1996,6 @@
                 const totalSec = (parseInt(min) || 0) * 60 + (parseInt(sec) || 0);
                 display.textContent = `= ${totalSec} seconds`;
                 
-                // Trigger star celebration for under 30 seconds
                 if (totalSec < 30 && totalSec > 0) {
                     launchStarCelebration();
                 }
@@ -1732,6 +2004,7 @@
             }
             
             calculateTotals();
+            checkMysteryBonusReveal();
         }
 
         function shareResults() {
@@ -2011,20 +2284,41 @@
             if (firebaseData) {
                 isUpdatingFromFirebase = true;
                 data = firebaseData;
+                
+                // Initialize mystery bonus for current week if not exists
+                const weekKey = `week${currentWeek}`;
+                if (data[weekKey] && !data[weekKey].mysteryBonus) {
+                    data[weekKey].mysteryBonus = generateMysteryBonus(weekKey);
+                }
+                
                 loadWeekData();
                 updateHistory();
                 checkBadges();
+                checkMysteryBonusReveal();
                 isUpdatingFromFirebase = false;
                 updateSyncStatus('✓ Synced');
             } else {
-                data = { [`week${currentWeek}`]: JSON.parse(JSON.stringify(defaultData)) };
+                const weekKey = `week${currentWeek}`;
+                data = { 
+                    [weekKey]: {
+                        ...JSON.parse(JSON.stringify(defaultData)),
+                        mysteryBonus: generateMysteryBonus(weekKey)
+                    }
+                };
                 dataRef.set(data);
             }
         });
 
         function loadWeekData() {
-            if (!data[`week${currentWeek}`]) {
-                data[`week${currentWeek}`] = JSON.parse(JSON.stringify(defaultData));
+            const weekKey = `week${currentWeek}`;
+            if (!data[weekKey]) {
+                data[weekKey] = {
+                    ...JSON.parse(JSON.stringify(defaultData)),
+                    mysteryBonus: generateMysteryBonus(weekKey)
+                };
+            }
+            if (!data[weekKey].mysteryBonus) {
+                data[weekKey].mysteryBonus = generateMysteryBonus(weekKey);
             }
             loadDayData();
         }
@@ -2096,15 +2390,14 @@
             updateFridayBanner();
             updateWednesdaySection();
             updateFinishButton();
+            highlightMysteryGame();
 
-            // Load Carl's data
             document.getElementById('carl-wordle').value = dayData.carl.wordle || '';
             document.getElementById('carl-connections').value = dayData.carl.connections || '';
             document.getElementById('carl-mini-min').value = dayData.carl.miniMin || '';
             document.getElementById('carl-mini-sec').value = dayData.carl.miniSec || '';
             handleInput('carl');
 
-            // Load Pete's data
             document.getElementById('pete-wordle').value = dayData.pete.wordle || '';
             document.getElementById('pete-connections').value = dayData.pete.connections || '';
             document.getElementById('pete-mini-min').value = dayData.pete.miniMin || '';
@@ -2112,6 +2405,7 @@
             handleInput('pete');
 
             calculateTotals();
+            checkMysteryBonusReveal();
         }
 
         function saveDayData() {
@@ -2119,7 +2413,10 @@
             const weekKey = `week${currentWeek}`;
 
             if (!data[weekKey]) {
-                data[weekKey] = JSON.parse(JSON.stringify(defaultData));
+                data[weekKey] = {
+                    ...JSON.parse(JSON.stringify(defaultData)),
+                    mysteryBonus: generateMysteryBonus(weekKey)
+                };
             }
 
             if (day === 'Wednesday') {
