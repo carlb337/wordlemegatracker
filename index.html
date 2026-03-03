@@ -683,6 +683,50 @@
             font-weight: 600;
         }
 
+        /* Purple First Checkbox Styles */
+        .purple-first-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .purple-first-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #7c3aed;
+        }
+
+        .purple-first-wrapper label {
+            font-size: 10px;
+            color: #7c3aed;
+            font-weight: 700;
+            margin-bottom: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .purple-first-wrapper label::before {
+            content: '🟪';
+            font-size: 12px;
+        }
+
+        .purple-first-active {
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%) !important;
+            border-color: #7c3aed !important;
+        }
+
+        .purple-bonus-indicator {
+            font-size: 9px;
+            color: #7c3aed;
+            font-weight: 700;
+            margin-top: 2px;
+            min-height: 12px;
+        }
+
         .totals-section {
             margin-top: 20px;
             padding-top: 20px;
@@ -972,6 +1016,10 @@
                 font-size: 18px;
                 padding: 15px 20px;
             }
+
+            .purple-first-wrapper label {
+                font-size: 9px;
+            }
         }
     </style>
 </head>
@@ -1042,7 +1090,6 @@
 
         <div class="wednesday-section" id="wednesdaySection">
             <div class="wednesday-title">📅 Wednesday Word</div>
-            
             <div class="wednesday-input-group">
                 <label>Today's word is:</label>
                 <input type="text" id="wednesday-word" oninput="saveWednesdayData()" placeholder="Enter the word...">
@@ -1070,7 +1117,13 @@
                             <option value="1life">1 Life Lost</option>
                             <option value="2lives">2 Lives Lost</option>
                             <option value="3lives">3 Lives Lost</option>
+                            <option value="failed">Failed</option>
                         </select>
+                        <div class="purple-first-wrapper">
+                            <input type="checkbox" id="carl-purple-first" onchange="handleInput('carl')">
+                            <label for="carl-purple-first">Purple First (2x)</label>
+                        </div>
+                        <div class="purple-bonus-indicator" id="carl-purple-indicator"></div>
                     </div>
                     <div class="input-group" id="carl-mini-group">
                         <label>Mini (mm:ss)</label>
@@ -1101,7 +1154,13 @@
                             <option value="1life">1 Life Lost</option>
                             <option value="2lives">2 Lives Lost</option>
                             <option value="3lives">3 Lives Lost</option>
+                            <option value="failed">Failed</option>
                         </select>
+                        <div class="purple-first-wrapper">
+                            <input type="checkbox" id="pete-purple-first" onchange="handleInput('pete')">
+                            <label for="pete-purple-first">Purple First (2x)</label>
+                        </div>
+                        <div class="purple-bonus-indicator" id="pete-purple-indicator"></div>
                     </div>
                     <div class="input-group" id="pete-mini-group">
                         <label>Mini (mm:ss)</label>
@@ -1115,7 +1174,7 @@
             </div>
         </div>
 
-        <p class="help-text">💡 Wordle 1 = 10pts | Connections: Perfect=5, 1 life=4, 2 lives=3, 3 lives=2<br>Mini: <30s=10pts, 30-60s=5pts, 61-90s=3pts, 91-120s=2pts, >120s=1pt<br>🎉 Friday: All points doubled! | 🎰 Mystery bonus each week!</p>
+        <p class="help-text">💡 Wordle 1 = 10pts | Connections: Perfect=5, 1 life=4, 2 lives=3, 3 lives=2, Failed=0<br>🟪 Purple First = 2x Connections score!<br>Mini: <30s=10pts, 30-60s=5pts, 61-90s=3pts, 91-120s=2pts, >120s=1pt<br>🎉 Friday: All points doubled! | 🎰 Mystery bonus each week!</p>
 
         <div class="badges-section">
             <div class="badges-title">🏅 Achievements</div>
@@ -1178,17 +1237,16 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
     <script>
         const firebaseConfig = {
-  apiKey: "AIzaSyAbOnhiomdlDyTFZfYMfteoIm8fwHKRKsk",
-  authDomain: "wordle-1affc.firebaseapp.com",
-  databaseURL: "https://wordle-1affc-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "wordle-1affc",
-  storageBucket: "wordle-1affc.firebasestorage.app",
-  messagingSenderId: "242269500720",
-  appId: "1:242269500720:web:af2adc376cd9b1b60c44f5"
-};
+            apiKey: "AIzaSyAbOnhiomdlDyTFZfYMfteoIm8fwHKRKsk",
+            authDomain: "wordle-1affc.firebaseapp.com",
+            databaseURL: "https://wordle-1affc-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "wordle-1affc",
+            storageBucket: "wordle-1affc.firebasestorage.app",
+            messagingSenderId: "242269500720",
+            appId: "1:242269500720:web:af2adc376cd9b1b60c44f5"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -1214,7 +1272,7 @@
                 align-items: center;
                 z-index: 10004;
             `;
-            
+
             passwordPrompt.innerHTML = `
                 <div style="
                     background: var(--container-bg);
@@ -1247,7 +1305,7 @@
                     >
                     <div style="display: flex; gap: 10px;">
                         <button 
-                            onclick="closePasswordPrompt()" 
+                            onclick="closePasswordPrompt()"
                             style="
                                 flex: 1;
                                 padding: 12px;
@@ -1263,7 +1321,7 @@
                             Cancel
                         </button>
                         <button 
-                            onclick="confirmReset()" 
+                            onclick="confirmReset()"
                             style="
                                 flex: 1;
                                 padding: 12px;
@@ -1290,13 +1348,13 @@
                     </p>
                 </div>
             `;
-            
+
             document.body.appendChild(passwordPrompt);
-            
+
             setTimeout(() => {
                 document.getElementById('resetPasswordInput').focus();
             }, 100);
-            
+
             document.getElementById('resetPasswordInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     confirmReset();
@@ -1314,19 +1372,19 @@
         function confirmReset() {
             const inputPassword = document.getElementById('resetPasswordInput').value;
             const errorMsg = document.getElementById('passwordError');
-            
+
             if (validateResetPassword(inputPassword)) {
                 closePasswordPrompt();
-                
+
                 if (confirm('⚠️ FINAL WARNING: This will permanently delete ALL data for ALL weeks and ALL users. Are you absolutely sure?')) {
-                    data = { 
+                    data = {
                         [`week${currentWeek}`]: JSON.parse(JSON.stringify(defaultData)),
                         history: {}
                     };
                     saveToFirebase();
                     loadDayData();
                     updateHistory();
-                    
+
                     const notification = document.createElement('div');
                     notification.style.cssText = `
                         position: fixed;
@@ -1343,7 +1401,7 @@
                     `;
                     notification.textContent = '🗑️ All data has been reset!';
                     document.body.appendChild(notification);
-                    
+
                     setTimeout(() => {
                         document.body.removeChild(notification);
                     }, 3000);
@@ -1352,7 +1410,7 @@
                 errorMsg.style.display = 'block';
                 document.getElementById('resetPasswordInput').value = '';
                 document.getElementById('resetPasswordInput').focus();
-                
+
                 const input = document.getElementById('resetPasswordInput');
                 input.style.animation = 'shake 0.3s';
                 setTimeout(() => {
@@ -1363,8 +1421,8 @@
 
         let currentWeek = getCurrentWeekNumber();
         let currentYear = new Date().getFullYear();
-        let theme = localStorage.getItem('theme') || 'light';
 
+        let theme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', theme);
         if (theme === 'dark') {
             document.getElementById('themeToggle').textContent = '☀️';
@@ -1372,7 +1430,6 @@
 
         function getCurrentWeekNumber() {
             const now = new Date();
-            
             const target = new Date(now.valueOf());
             const dayNumber = (now.getDay() + 6) % 7;
             target.setDate(target.getDate() - dayNumber + 3);
@@ -1381,7 +1438,6 @@
             if (target.getDay() !== 4) {
                 target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
             }
-            
             return 1 + Math.ceil((firstThursday - target) / 604800000);
         }
 
@@ -1390,14 +1446,13 @@
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
             const games = ['wordle', 'connections', 'mini'];
             const multipliers = [2, 3, 4];
-            
+
             // Use week number as seed for consistent random
             const seed = parseInt(weekKey.replace('week', ''));
-            
             const dayIndex = seed % days.length;
             const gameIndex = (seed * 3) % games.length;
             const multIndex = (seed * 7) % multipliers.length;
-            
+
             return {
                 day: days[dayIndex],
                 game: games[gameIndex],
@@ -1411,21 +1466,21 @@
             if (!data[weekKey].mysteryBonus) {
                 data[weekKey].mysteryBonus = generateMysteryBonus(weekKey);
             }
-            
+
             const mystery = data[weekKey].mysteryBonus;
-            
+
             if (mystery.revealed) {
                 updateMysteryBonusBanner(true);
                 return;
             }
-            
+
             const bonusDay = mystery.day;
             const bonusGame = mystery.game;
             const dayData = data[weekKey][bonusDay];
-            
+
             let carlCompleted = false;
             let peteCompleted = false;
-            
+
             if (bonusGame === 'wordle') {
                 carlCompleted = dayData.carl.wordle !== '';
                 peteCompleted = dayData.pete.wordle !== '';
@@ -1436,38 +1491,38 @@
                 carlCompleted = (dayData.carl.miniMin !== '' || dayData.carl.miniSec !== '');
                 peteCompleted = (dayData.pete.miniMin !== '' || dayData.pete.miniSec !== '');
             }
-            
+
             if (carlCompleted && peteCompleted && !mystery.revealed) {
                 mystery.revealed = true;
                 data[weekKey].mysteryBonus = mystery;
                 saveToFirebase();
                 revealMysteryBonus();
             }
-            
+
             updateMysteryBonusBanner(mystery.revealed);
         }
 
         function revealMysteryBonus() {
             const weekKey = `week${currentWeek}`;
             const mystery = data[weekKey].mysteryBonus;
-            
+
             const gameNames = {
                 'wordle': 'Wordle',
                 'connections': 'Connections',
                 'mini': 'Mini Crossword'
             };
-            
+
             document.getElementById('mysteryDay').textContent = mystery.day;
             document.getElementById('mysteryGame').textContent = gameNames[mystery.game];
             document.getElementById('mysteryMultiplier').textContent = `${mystery.multiplier}X POINTS!`;
-            
+
             const reveal = document.getElementById('mysteryReveal');
             reveal.classList.add('show');
-            
+
             playVictorySound();
             launchConfetti();
             launchStarCelebration();
-            
+
             calculateTotals();
         }
 
@@ -1479,13 +1534,13 @@
         function updateMysteryBonusBanner(revealed) {
             const weekKey = `week${currentWeek}`;
             const banner = document.getElementById('mysteryBonusBanner');
-            
+
             if (!data[weekKey].mysteryBonus) {
                 data[weekKey].mysteryBonus = generateMysteryBonus(weekKey);
             }
-            
+
             const mystery = data[weekKey].mysteryBonus;
-            
+
             if (revealed) {
                 const gameNames = {
                     'wordle': 'Wordle',
@@ -1503,7 +1558,7 @@
         function highlightMysteryGame() {
             const weekKey = `week${currentWeek}`;
             const day = document.getElementById('daySelect').value;
-            
+
             // Remove all highlights first
             ['carl', 'pete'].forEach(person => {
                 ['wordle', 'connections', 'mini'].forEach(game => {
@@ -1511,11 +1566,11 @@
                     if (group) group.classList.remove('mystery-bonus');
                 });
             });
-            
+
             if (!data[weekKey].mysteryBonus) return;
-            
+
             const mystery = data[weekKey].mysteryBonus;
-            
+
             // Only highlight if on the mystery day and bonus is revealed
             if (day === mystery.day && mystery.revealed) {
                 ['carl', 'pete'].forEach(person => {
@@ -1534,19 +1589,19 @@
                 currentWeek = 1;
                 currentYear++;
             }
-            
+
             updateWeekDisplay();
             loadWeekData();
         }
 
         function updateWeekDisplay() {
             document.getElementById('weekInfo').textContent = `Week ${currentWeek}, ${currentYear}`;
-            
+
             const thisWeek = getCurrentWeekNumber();
             const thisYear = new Date().getFullYear();
             const isCurrentWeek = (currentWeek === thisWeek && currentYear === thisYear);
             const isFutureWeek = (currentYear > thisYear) || (currentYear === thisYear && currentWeek > thisWeek);
-            
+
             document.getElementById('nextWeekBtn').disabled = isCurrentWeek || isFutureWeek;
         }
 
@@ -1554,7 +1609,6 @@
             theme = theme === 'light' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
-            
             const btn = document.getElementById('themeToggle');
             btn.textContent = theme === 'dark' ? '☀️' : '🌙';
         }
@@ -1566,24 +1620,22 @@
         function playCelebrationSound() {
             if (!soundEnabled) return;
             audioContext.resume();
-            
+
             const now = audioContext.currentTime;
-            
             [0, 0.08, 0.16, 0.24].forEach((delay, i) => {
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
-                
                 osc.connect(gain);
                 gain.connect(audioContext.destination);
-                
+
                 const notes = [523.25, 659.25, 783.99, 1046.50];
                 osc.frequency.setValueAtTime(notes[i], now + delay);
                 osc.type = 'sine';
-                
+
                 gain.gain.setValueAtTime(0, now + delay);
                 gain.gain.linearRampToValueAtTime(0.3, now + delay + 0.01);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.3);
-                
+
                 osc.start(now + delay);
                 osc.stop(now + delay + 0.3);
             });
@@ -1592,22 +1644,17 @@
         function playSpeedSound() {
             if (!soundEnabled) return;
             audioContext.resume();
-            
+
             const now = audioContext.currentTime;
-            
             [0, 0.05, 0.1, 0.15, 0.2].forEach((delay, i) => {
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
-                
                 osc.connect(gain);
                 gain.connect(audioContext.destination);
-                
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(400 + (i * 200), now + delay);
-                
                 gain.gain.setValueAtTime(0.2, now + delay);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.1);
-                
                 osc.start(now + delay);
                 osc.stop(now + delay + 0.1);
             });
@@ -1616,9 +1663,8 @@
         function playVictorySound() {
             if (!soundEnabled) return;
             audioContext.resume();
-            
+
             const now = audioContext.currentTime;
-            
             const fanfare = [
                 { freq: 523.25, time: 0, duration: 0.2 },
                 { freq: 659.25, time: 0.2, duration: 0.2 },
@@ -1627,38 +1673,34 @@
                 { freq: 783.99, time: 1.2, duration: 0.2 },
                 { freq: 1046.50, time: 1.4, duration: 0.6 }
             ];
-            
+
             fanfare.forEach(note => {
                 const osc1 = audioContext.createOscillator();
                 const gain1 = audioContext.createGain();
-                
                 osc1.connect(gain1);
                 gain1.connect(audioContext.destination);
-                
                 osc1.type = 'sawtooth';
                 osc1.frequency.setValueAtTime(note.freq, now + note.time);
-                
+
                 gain1.gain.setValueAtTime(0, now + note.time);
                 gain1.gain.linearRampToValueAtTime(0.3, now + note.time + 0.02);
                 gain1.gain.setValueAtTime(0.3, now + note.time + note.duration - 0.1);
                 gain1.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
-                
+
                 osc1.start(now + note.time);
                 osc1.stop(now + note.time + note.duration);
-                
+
                 const osc2 = audioContext.createOscillator();
                 const gain2 = audioContext.createGain();
-                
                 osc2.connect(gain2);
                 gain2.connect(audioContext.destination);
-                
                 osc2.type = 'sine';
                 osc2.frequency.setValueAtTime(note.freq * 1.25, now + note.time);
-                
+
                 gain2.gain.setValueAtTime(0, now + note.time);
                 gain2.gain.linearRampToValueAtTime(0.15, now + note.time + 0.02);
                 gain2.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
-                
+
                 osc2.start(now + note.time);
                 osc2.stop(now + note.time + note.duration);
             });
@@ -1667,12 +1709,12 @@
         function toggleSound() {
             soundEnabled = !soundEnabled;
             localStorage.setItem('soundEnabled', soundEnabled);
-            
             const button = document.getElementById('soundToggle');
+
             if (soundEnabled) {
                 button.textContent = '🔊';
                 button.classList.remove('muted');
-                
+
                 audioContext.resume();
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
@@ -1745,7 +1787,6 @@
                 this.x += this.vx;
                 this.y += this.vy;
                 this.rotation += this.rotationSpeed;
-
                 if (this.y > canvas.height) {
                     return false;
                 }
@@ -1779,11 +1820,9 @@
                 this.x += this.vx;
                 this.y += this.vy;
                 this.rotation += this.rotationSpeed;
-                
                 if (this.y > trophyCanvas.height * 0.7) {
                     this.opacity -= 0.015;
                 }
-                
                 if (this.y > trophyCanvas.height || this.opacity <= 0) {
                     return false;
                 }
@@ -1820,11 +1859,9 @@
                 this.x += this.vx;
                 this.y += this.vy;
                 this.rotation += this.rotationSpeed;
-                
                 if (this.y > starCanvas.height * 0.8) {
                     this.opacity -= 0.02;
                 }
-                
                 if (this.y > starCanvas.height || this.opacity <= 0) {
                     return false;
                 }
@@ -1846,11 +1883,9 @@
 
         function launchConfetti() {
             playCelebrationSound();
-            
             for (let i = 0; i < 150; i++) {
                 confettiPieces.push(new ConfettiPiece());
             }
-
             if (!animationFrame) {
                 animateConfetti();
             }
@@ -1858,12 +1893,10 @@
 
         function animateConfetti() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             confettiPieces = confettiPieces.filter(piece => {
                 piece.draw();
                 return piece.update();
             });
-
             if (confettiPieces.length > 0) {
                 animationFrame = requestAnimationFrame(animateConfetti);
             } else {
@@ -1875,7 +1908,6 @@
             for (let i = 0; i < 100; i++) {
                 trophyEmojis.push(new TrophyEmoji());
             }
-            
             if (!trophyAnimationFrame) {
                 animateTrophies();
             }
@@ -1883,12 +1915,10 @@
 
         function animateTrophies() {
             trophyCtx.clearRect(0, 0, trophyCanvas.width, trophyCanvas.height);
-            
             trophyEmojis = trophyEmojis.filter(emoji => {
                 emoji.draw();
                 return emoji.update();
             });
-
             if (trophyEmojis.length > 0) {
                 trophyAnimationFrame = requestAnimationFrame(animateTrophies);
             } else {
@@ -1898,11 +1928,9 @@
 
         function launchStarCelebration() {
             playSpeedSound();
-            
             for (let i = 0; i < 60; i++) {
                 starEmojis.push(new StarEmoji());
             }
-            
             if (!starAnimationFrame) {
                 animateStars();
             }
@@ -1910,12 +1938,10 @@
 
         function animateStars() {
             starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
-            
             starEmojis = starEmojis.filter(emoji => {
                 emoji.draw();
                 return emoji.update();
             });
-
             if (starEmojis.length > 0) {
                 starAnimationFrame = requestAnimationFrame(animateStars);
             } else {
@@ -1931,23 +1957,30 @@
             return 0;
         }
 
-        function calculateConnectionsScore(connections) {
+        function calculateConnectionsScore(connections, purpleFirst) {
             const scores = {
                 'perfect': 5,
                 '1life': 4,
                 '2lives': 3,
-                '3lives': 2
+                '3lives': 2,
+                'failed': 0
             };
-            return scores[connections] || 0;
+            let baseScore = scores[connections] || 0;
+            
+            // Double the score if purple was matched first (and they didn't fail)
+            if (purpleFirst && connections && connections !== 'failed') {
+                baseScore *= 2;
+            }
+            
+            return baseScore;
         }
 
         function calculateMiniScore(minutes, seconds) {
             if (minutes === '' && seconds === '') return 0;
-            
             const min = parseInt(minutes) || 0;
             const sec = parseInt(seconds) || 0;
             const totalSeconds = (min * 60) + sec;
-            
+
             if (totalSeconds === 0) return 0;
             if (totalSeconds < 30) return 10;
             if (totalSeconds <= 60) return 5;
@@ -1956,64 +1989,73 @@
             return 1;
         }
 
-        function calculateDailyTotal(wordle, connections, miniMin, miniSec, day) {
+        function calculateDailyTotal(wordle, connections, miniMin, miniSec, day, purpleFirst) {
             const weekKey = `week${currentWeek}`;
             const mystery = data[weekKey]?.mysteryBonus;
-            
+
             let wordleScore = calculateWordleScore(wordle);
-            let connectionsScore = calculateConnectionsScore(connections);
+            let connectionsScore = calculateConnectionsScore(connections, purpleFirst);
             let miniScore = calculateMiniScore(miniMin, miniSec);
-            
+
             // Apply mystery bonus if revealed
             if (mystery && mystery.revealed && mystery.day === day) {
                 if (mystery.game === 'wordle') wordleScore *= mystery.multiplier;
                 if (mystery.game === 'connections') connectionsScore *= mystery.multiplier;
                 if (mystery.game === 'mini') miniScore *= mystery.multiplier;
             }
-            
+
             let total = wordleScore + connectionsScore + miniScore;
-            
+
             // Friday bonus still applies (separate from mystery bonus)
             if (day === 'Friday') {
                 total = total * 2;
             }
-            
+
             return total;
         }
 
         function handleInput(person) {
             const wordle = document.getElementById(`${person}-wordle`).value;
-            
             if (wordle === '1') {
                 launchConfetti();
             }
-            
+
             const min = document.getElementById(`${person}-mini-min`).value;
             const sec = document.getElementById(`${person}-mini-sec`).value;
             const display = document.getElementById(`${person}-mini-display`);
-            
+
             if ((min && min !== '') || (sec && sec !== '')) {
                 const totalSec = (parseInt(min) || 0) * 60 + (parseInt(sec) || 0);
                 display.textContent = `= ${totalSec} seconds`;
-                
                 if (totalSec < 30 && totalSec > 0) {
                     launchStarCelebration();
                 }
             } else {
                 display.textContent = '';
             }
+
+            // Update purple first indicator
+            const connections = document.getElementById(`${person}-connections`).value;
+            const purpleFirst = document.getElementById(`${person}-purple-first`).checked;
+            const purpleIndicator = document.getElementById(`${person}-purple-indicator`);
             
+            if (purpleFirst && connections && connections !== 'failed' && connections !== '') {
+                const baseScore = {'perfect': 5, '1life': 4, '2lives': 3, '3lives': 2}[connections] || 0;
+                purpleIndicator.textContent = `🟪 ${baseScore} → ${baseScore * 2} pts`;
+            } else {
+                purpleIndicator.textContent = '';
+            }
+
             calculateTotals();
             checkMysteryBonusReveal();
         }
 
         function shareResults() {
             let carlTotal = 0, peteTotal = 0;
-
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(d => {
                 const dayData = data[`week${currentWeek}`]?.[d] || defaultData[d];
-                carlTotal += calculateDailyTotal(dayData.carl.wordle, dayData.carl.connections, dayData.carl.miniMin, dayData.carl.miniSec, d);
-                peteTotal += calculateDailyTotal(dayData.pete.wordle, dayData.pete.connections, dayData.pete.miniMin, dayData.pete.miniSec, d);
+                carlTotal += calculateDailyTotal(dayData.carl.wordle, dayData.carl.connections, dayData.carl.miniMin, dayData.carl.miniSec, d, dayData.carl.purpleFirst);
+                peteTotal += calculateDailyTotal(dayData.pete.wordle, dayData.pete.connections, dayData.pete.miniMin, dayData.pete.miniSec, d, dayData.pete.purpleFirst);
             });
 
             const scores = [
@@ -2042,11 +2084,10 @@
 
         function finishWeek() {
             let carlTotal = 0, peteTotal = 0;
-
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(d => {
                 const dayData = data[`week${currentWeek}`]?.[d] || defaultData[d];
-                carlTotal += calculateDailyTotal(dayData.carl.wordle, dayData.carl.connections, dayData.carl.miniMin, dayData.carl.miniSec, d);
-                peteTotal += calculateDailyTotal(dayData.pete.wordle, dayData.pete.connections, dayData.pete.miniMin, dayData.pete.miniSec, d);
+                carlTotal += calculateDailyTotal(dayData.carl.wordle, dayData.carl.connections, dayData.carl.miniMin, dayData.carl.miniSec, d, dayData.carl.purpleFirst);
+                peteTotal += calculateDailyTotal(dayData.pete.wordle, dayData.pete.connections, dayData.pete.miniMin, dayData.pete.miniSec, d, dayData.pete.purpleFirst);
             });
 
             const scores = [
@@ -2056,7 +2097,6 @@
 
             scores.sort((a, b) => b.score - a.score);
             const winner = scores[0];
-
             const isTie = scores[0].score === scores[1].score;
 
             const banner = document.getElementById('victoryBanner');
@@ -2069,7 +2109,7 @@
             } else {
                 winnerName.textContent = winner.name;
                 winnerScore.textContent = `Score: ${winner.score.toFixed(2)} points`;
-                
+
                 if (!data.history) data.history = {};
                 data.history[`${currentYear}-${currentWeek}`] = {
                     winner: winner.name,
@@ -2082,11 +2122,9 @@
             }
 
             banner.classList.add('show');
-
             playVictorySound();
             launchConfetti();
             launchTrophyCelebration();
-            
             checkBadges();
         }
 
@@ -2098,7 +2136,7 @@
         function updateFinishButton() {
             const day = document.getElementById('daySelect').value;
             const finishSection = document.getElementById('finishSection');
-            
+
             if (day === 'Friday') {
                 finishSection.classList.add('active');
             } else {
@@ -2109,22 +2147,20 @@
         function checkBadges() {
             const history = data.history || {};
             const weekKeys = Object.keys(history).sort();
-            
+
             const carlHistory = [];
             const peteHistory = [];
-            
+
             weekKeys.forEach(key => {
                 const winner = history[key].winner;
                 if (winner === 'Carl') carlHistory.push(key);
                 if (winner === 'Pete') peteHistory.push(key);
             });
-            
+
             checkOnFireBadge(carlHistory, 'carl');
             checkOnFireBadge(peteHistory, 'pete');
-            
             checkChampionBadge(carlHistory.length, 'carl');
             checkChampionBadge(peteHistory.length, 'pete');
-            
             checkWeekBadges();
         }
 
@@ -2146,35 +2182,33 @@
 
         function checkWeekBadges() {
             const weekData = data[`week${currentWeek}`] || {};
-            
             let carlWordleGood = 0, peteWordleGood = 0;
             let carlSpeedRuns = 0, peteSpeedRuns = 0;
             let carlPerfectConnections = 0, petePerfectConnections = 0;
-            
+
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(day => {
                 const dayData = weekData[day] || defaultData[day];
-                
+
                 if (dayData.carl.wordle && parseInt(dayData.carl.wordle) <= 3) carlWordleGood++;
                 if (dayData.pete.wordle && parseInt(dayData.pete.wordle) <= 3) peteWordleGood++;
-                
+
                 const carlSec = (parseInt(dayData.carl.miniMin) || 0) * 60 + (parseInt(dayData.carl.miniSec) || 0);
                 const peteSec = (parseInt(dayData.pete.miniMin) || 0) * 60 + (parseInt(dayData.pete.miniSec) || 0);
-                
                 if (carlSec > 0 && carlSec < 30) carlSpeedRuns++;
                 if (peteSec > 0 && peteSec < 30) peteSpeedRuns++;
-                
+
                 if (dayData.carl.connections === 'perfect') carlPerfectConnections++;
                 if (dayData.pete.connections === 'perfect') petePerfectConnections++;
             });
-            
+
             if (carlWordleGood >= 5 || peteWordleGood >= 5) {
                 document.getElementById('badge-wordsmith').classList.add('earned');
             }
-            
+
             if (carlSpeedRuns >= 3 || peteSpeedRuns >= 3) {
                 document.getElementById('badge-speedster').classList.add('earned');
             }
-            
+
             if (carlPerfectConnections >= 3 || petePerfectConnections >= 3) {
                 document.getElementById('badge-connector').classList.add('earned');
             }
@@ -2183,15 +2217,15 @@
         function updateHistory() {
             const history = data.history || {};
             const historyContent = document.getElementById('historyContent');
-            
+
             if (Object.keys(history).length === 0) {
                 historyContent.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 12px;">No completed weeks yet</p>';
                 return;
             }
-            
+
             const wins = { Carl: 0, Pete: 0 };
             const weekKeys = Object.keys(history).sort().reverse();
-            
+
             let html = '';
             weekKeys.slice(0, 5).forEach(key => {
                 const h = history[key];
@@ -2203,7 +2237,7 @@
                     </div>
                 `;
             });
-            
+
             const standings = Object.entries(wins).sort((a, b) => b[1] - a[1]);
             html += '<div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--border-color);">';
             html += '<p style="text-align: center; font-weight: 700; color: var(--text-primary); margin-bottom: 10px;">Overall Wins</p>';
@@ -2211,7 +2245,7 @@
                 html += `<p style="text-align: center; color: var(--text-secondary); font-size: 13px;">${name}: ${count}</p>`;
             });
             html += '</div>';
-            
+
             historyContent.innerHTML = html;
         }
 
@@ -2220,8 +2254,8 @@
 
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(d => {
                 const dayData = data[`week${currentWeek}`]?.[d] || defaultData[d];
-                carlTotal += calculateDailyTotal(dayData.carl.wordle, dayData.carl.connections, dayData.carl.miniMin, dayData.carl.miniSec, d);
-                peteTotal += calculateDailyTotal(dayData.pete.wordle, dayData.pete.connections, dayData.pete.miniMin, dayData.pete.miniSec, d);
+                carlTotal += calculateDailyTotal(dayData.carl.wordle, dayData.carl.connections, dayData.carl.miniMin, dayData.carl.miniSec, d, dayData.carl.purpleFirst);
+                peteTotal += calculateDailyTotal(dayData.pete.wordle, dayData.pete.connections, dayData.pete.miniMin, dayData.pete.miniSec, d, dayData.pete.purpleFirst);
             });
 
             const scores = [
@@ -2253,26 +2287,26 @@
         }
 
         const defaultData = {
-            Monday: { 
-                carl: { wordle: '', connections: '', miniMin: '', miniSec: '' }, 
-                pete: { wordle: '', connections: '', miniMin: '', miniSec: '' }
+            Monday: {
+                carl: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false },
+                pete: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false }
             },
-            Tuesday: { 
-                carl: { wordle: '', connections: '', miniMin: '', miniSec: '' }, 
-                pete: { wordle: '', connections: '', miniMin: '', miniSec: '' }
+            Tuesday: {
+                carl: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false },
+                pete: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false }
             },
-            Wednesday: { 
-                carl: { wordle: '', connections: '', miniMin: '', miniSec: '' }, 
-                pete: { wordle: '', connections: '', miniMin: '', miniSec: '' },
+            Wednesday: {
+                carl: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false },
+                pete: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false },
                 word: ''
             },
-            Thursday: { 
-                carl: { wordle: '', connections: '', miniMin: '', miniSec: '' }, 
-                pete: { wordle: '', connections: '', miniMin: '', miniSec: '' }
+            Thursday: {
+                carl: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false },
+                pete: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false }
             },
-            Friday: { 
-                carl: { wordle: '', connections: '', miniMin: '', miniSec: '' }, 
-                pete: { wordle: '', connections: '', miniMin: '', miniSec: '' }
+            Friday: {
+                carl: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false },
+                pete: { wordle: '', connections: '', miniMin: '', miniSec: '', purpleFirst: false }
             }
         };
 
@@ -2284,13 +2318,13 @@
             if (firebaseData) {
                 isUpdatingFromFirebase = true;
                 data = firebaseData;
-                
+
                 // Initialize mystery bonus for current week if not exists
                 const weekKey = `week${currentWeek}`;
                 if (data[weekKey] && !data[weekKey].mysteryBonus) {
                     data[weekKey].mysteryBonus = generateMysteryBonus(weekKey);
                 }
-                
+
                 loadWeekData();
                 updateHistory();
                 checkBadges();
@@ -2299,7 +2333,7 @@
                 updateSyncStatus('✓ Synced');
             } else {
                 const weekKey = `week${currentWeek}`;
-                data = { 
+                data = {
                     [weekKey]: {
                         ...JSON.parse(JSON.stringify(defaultData)),
                         mysteryBonus: generateMysteryBonus(weekKey)
@@ -2317,9 +2351,11 @@
                     mysteryBonus: generateMysteryBonus(weekKey)
                 };
             }
+
             if (!data[weekKey].mysteryBonus) {
                 data[weekKey].mysteryBonus = generateMysteryBonus(weekKey);
             }
+
             loadDayData();
         }
 
@@ -2348,9 +2384,7 @@
         function saveWednesdayData() {
             const weekKey = `week${currentWeek}`;
             if (!data[weekKey].Wednesday.word) data[weekKey].Wednesday.word = '';
-            
             data[weekKey].Wednesday.word = document.getElementById('wednesday-word').value || '';
-            
             saveToFirebase();
         }
 
@@ -2358,7 +2392,7 @@
             const day = document.getElementById('daySelect').value;
             const wednesdaySection = document.getElementById('wednesdaySection');
             const weekKey = `week${currentWeek}`;
-            
+
             if (day === 'Wednesday') {
                 wednesdaySection.classList.add('active');
                 const wedData = data[weekKey]?.Wednesday || defaultData.Wednesday;
@@ -2396,12 +2430,14 @@
             document.getElementById('carl-connections').value = dayData.carl.connections || '';
             document.getElementById('carl-mini-min').value = dayData.carl.miniMin || '';
             document.getElementById('carl-mini-sec').value = dayData.carl.miniSec || '';
+            document.getElementById('carl-purple-first').checked = dayData.carl.purpleFirst || false;
             handleInput('carl');
 
             document.getElementById('pete-wordle').value = dayData.pete.wordle || '';
             document.getElementById('pete-connections').value = dayData.pete.connections || '';
             document.getElementById('pete-mini-min').value = dayData.pete.miniMin || '';
             document.getElementById('pete-mini-sec').value = dayData.pete.miniSec || '';
+            document.getElementById('pete-purple-first').checked = dayData.pete.purpleFirst || false;
             handleInput('pete');
 
             calculateTotals();
@@ -2425,13 +2461,15 @@
                         wordle: document.getElementById('carl-wordle').value || '',
                         connections: document.getElementById('carl-connections').value || '',
                         miniMin: document.getElementById('carl-mini-min').value || '',
-                        miniSec: document.getElementById('carl-mini-sec').value || ''
+                        miniSec: document.getElementById('carl-mini-sec').value || '',
+                        purpleFirst: document.getElementById('carl-purple-first').checked || false
                     },
                     pete: {
                         wordle: document.getElementById('pete-wordle').value || '',
                         connections: document.getElementById('pete-connections').value || '',
                         miniMin: document.getElementById('pete-mini-min').value || '',
-                        miniSec: document.getElementById('pete-mini-sec').value || ''
+                        miniSec: document.getElementById('pete-mini-sec').value || '',
+                        purpleFirst: document.getElementById('pete-purple-first').checked || false
                     },
                     word: data[weekKey].Wednesday?.word || ''
                 };
@@ -2441,13 +2479,15 @@
                         wordle: document.getElementById('carl-wordle').value || '',
                         connections: document.getElementById('carl-connections').value || '',
                         miniMin: document.getElementById('carl-mini-min').value || '',
-                        miniSec: document.getElementById('carl-mini-sec').value || ''
+                        miniSec: document.getElementById('carl-mini-sec').value || '',
+                        purpleFirst: document.getElementById('carl-purple-first').checked || false
                     },
                     pete: {
                         wordle: document.getElementById('pete-wordle').value || '',
                         connections: document.getElementById('pete-connections').value || '',
                         miniMin: document.getElementById('pete-mini-min').value || '',
-                        miniSec: document.getElementById('pete-mini-sec').value || ''
+                        miniSec: document.getElementById('pete-mini-sec').value || '',
+                        purpleFirst: document.getElementById('pete-purple-first').checked || false
                     }
                 };
             }
@@ -2457,23 +2497,21 @@
 
         function calculateTotals() {
             saveDayData();
-
             const day = document.getElementById('daySelect').value;
             const weekKey = `week${currentWeek}`;
             const dayData = data[weekKey]?.[day] || defaultData[day];
 
-            const carlDaily = calculateDailyTotal(dayData.carl.wordle, dayData.carl.connections, dayData.carl.miniMin, dayData.carl.miniSec, day);
-            const peteDaily = calculateDailyTotal(dayData.pete.wordle, dayData.pete.connections, dayData.pete.miniMin, dayData.pete.miniSec, day);
+            const carlDaily = calculateDailyTotal(dayData.carl.wordle, dayData.carl.connections, dayData.carl.miniMin, dayData.carl.miniSec, day, dayData.carl.purpleFirst);
+            const peteDaily = calculateDailyTotal(dayData.pete.wordle, dayData.pete.connections, dayData.pete.miniMin, dayData.pete.miniSec, day, dayData.pete.purpleFirst);
 
             document.getElementById('carl-daily').textContent = carlDaily.toFixed(2);
             document.getElementById('pete-daily').textContent = peteDaily.toFixed(2);
 
             let carlTotal = 0, peteTotal = 0;
-
             ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(d => {
                 const dData = data[weekKey]?.[d] || defaultData[d];
-                carlTotal += calculateDailyTotal(dData.carl.wordle, dData.carl.connections, dData.carl.miniMin, dData.carl.miniSec, d);
-                peteTotal += calculateDailyTotal(dData.pete.wordle, dData.pete.connections, dData.pete.miniMin, dData.pete.miniSec, d);
+                carlTotal += calculateDailyTotal(dData.carl.wordle, dData.carl.connections, dData.carl.miniMin, dData.carl.miniSec, d, dData.carl.purpleFirst);
+                peteTotal += calculateDailyTotal(dData.pete.wordle, dData.pete.connections, dData.pete.miniMin, dData.pete.miniSec, d, dData.pete.purpleFirst);
             });
 
             document.getElementById('carl-total').textContent = carlTotal.toFixed(2);
