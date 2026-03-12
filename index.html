@@ -295,6 +295,16 @@
             border-radius: 8px;
             margin-bottom: 15px;
             border: 2px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .week-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: space-between;
         }
 
         .week-selector button {
@@ -316,6 +326,16 @@
         .week-selector button:disabled {
             background: #ccc;
             cursor: not-allowed;
+        }
+
+        .today-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .today-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
         }
 
         .week-info {
@@ -943,6 +963,14 @@
             .badges-grid {
                 grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             }
+
+            .week-selector {
+                flex-wrap: nowrap;
+            }
+
+            .today-btn {
+                width: auto;
+            }
         }
 
         @media (max-width: 380px) {
@@ -1020,6 +1048,15 @@
             .purple-first-wrapper label {
                 font-size: 9px;
             }
+
+            .week-selector button {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .week-info {
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -1059,9 +1096,12 @@
         <p class="subtitle">Wordle • Connections • Mini Crossword</p>
 
         <div class="week-selector">
-            <button onclick="changeWeek(-1)">← Prev</button>
-            <div class="week-info" id="weekInfo">Week 5, 2026</div>
-            <button onclick="changeWeek(1)" id="nextWeekBtn">Next →</button>
+            <div class="week-nav">
+                <button onclick="changeWeek(-1)">← Prev</button>
+                <div class="week-info" id="weekInfo">Week 5, 2026</div>
+                <button onclick="changeWeek(1)" id="nextWeekBtn">Next →</button>
+            </div>
+            <button class="today-btn" onclick="skipToToday()">📅 Today</button>
         </div>
 
         <div id="mysteryBonusBanner" class="mystery-bonus-banner hidden">
@@ -1439,6 +1479,60 @@
                 target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
             }
             return 1 + Math.ceil((firstThursday - target) / 604800000);
+        }
+
+        function getCurrentDayName() {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const today = days[new Date().getDay()];
+            
+            // If it's a weekend, default to Friday (most recent game day)
+            if (today === 'Saturday' || today === 'Sunday') {
+                return 'Friday';
+            }
+            return today;
+        }
+
+        function setCurrentDay() {
+            const currentDay = getCurrentDayName();
+            const daySelect = document.getElementById('daySelect');
+            daySelect.value = currentDay;
+        }
+
+        function skipToToday() {
+            // Reset to current week and year
+            currentWeek = getCurrentWeekNumber();
+            currentYear = new Date().getFullYear();
+            
+            // Update week display
+            updateWeekDisplay();
+            
+            // Set to current day
+            setCurrentDay();
+            
+            // Load the data for current week and day
+            loadWeekData();
+            
+            // Show confirmation
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #10b981;
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 10005;
+            `;
+            notification.textContent = `📅 Jumped to ${getCurrentDayName()}, Week ${currentWeek}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 2000);
         }
 
         // Mystery Bonus System
@@ -2224,10 +2318,16 @@
             }
 
             const wins = { Carl: 0, Pete: 0 };
-            const weekKeys = Object.keys(history).sort().reverse();
+            // Sort chronologically (oldest first)
+            const weekKeys = Object.keys(history).sort((a, b) => {
+                const [yearA, weekA] = a.split('-').map(Number);
+                const [yearB, weekB] = b.split('-').map(Number);
+                if (yearA !== yearB) return yearA - yearB;
+                return weekA - weekB;
+            });
 
             let html = '';
-            weekKeys.slice(0, 5).forEach(key => {
+            weekKeys.forEach(key => {
                 const h = history[key];
                 wins[h.winner] = (wins[h.winner] || 0) + 1;
                 html += `
@@ -2523,6 +2623,8 @@
         window.onload = function() {
             updateSyncStatus('🔄 Loading...');
             updateWeekDisplay();
+            // Set to current day on initial load
+            setCurrentDay();
         };
     </script>
 </body>
